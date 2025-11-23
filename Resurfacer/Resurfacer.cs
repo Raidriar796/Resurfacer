@@ -21,5 +21,54 @@ public class Resurfacer : ResoniteMod
         Config = GetConfiguration();
         Config?.Save(true);
         harmony.PatchAll();
+
+        // Call void method to avoid inability to cast to action
+        Engine.Current.RunPostInit(AddEditor);
+    }
+
+    private static void AddEditor()
+    {
+        // Add new button to editors submenu
+        DevCreateNewForm.AddAction("Editor", "Resurfacer", (UI) => SpawnResurfacer(UI));
+    }
+
+    private static void SpawnResurfacer(Slot ResurfacerUI)
+    {
+        // Slot setup
+        ResurfacerUI.PersistentSelf = false;
+        ResurfacerUI.LocalScale *= 0.0005f;
+
+        // Initial UI generation
+        UIBuilder UI = RadiantUI_Panel.SetupPanel(ResurfacerUI, "Resurfacer", new float2(360f, 360f), true, true);
+        RadiantUI_Constants.SetupEditorStyle(UI);
+        VerticalLayout verticalLayout = UI.VerticalLayout(4f);
+        UI.Style.MinHeight = 24f;
+        UI.Style.PreferredHeight = 24f;
+
+        // Prevent accidents and abuse
+        UI.Canvas.AcceptPhysicalTouch.Value = false;
+        UI.Canvas.MarkDeveloper();
+
+        // Setup target slot field
+        ReferenceField<Slot> targetSlot = ResurfacerUI.AttachComponent<ReferenceField<Slot>>();
+        UI.Text("Target Hierarchy:", true, Alignment.BottomCenter);
+        UI.Next("Root");
+        UI.Current.AttachComponent<RefEditor>().Setup(targetSlot.Reference);
+
+        // Setup preferred format
+        ValueField<TextureCompression> targetFormat = ResurfacerUI.AttachComponent<ValueField<TextureCompression>>();
+        UI.EnumMemberEditor(targetFormat.Value);
+
+        UI.Spacer(24f);
+
+        // Buttons that do things maybe
+        var setFormatButton = UI.Button("Set Format");
+        var forceFormatButton = UI.Button("Force Format");
+
+        // Subscribe buttons to do things
+        setFormatButton.LocalPressed += SetFormat;
+        forceFormatButton.LocalPressed += ForceFormat;
+
+    }
     }
 }
