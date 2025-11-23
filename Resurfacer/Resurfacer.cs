@@ -70,5 +70,69 @@ public class Resurfacer : ResoniteMod
         forceFormatButton.LocalPressed += ForceFormat;
 
     }
+
+    private static void SetFormat(IButton sourceButton, ButtonEventData eventData)
+    {
+        Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
+        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        Action<IAssetRef> primaryAction = null!;
+        if (targetSlot == null) return;
+
+        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
+        {
+            foreach (IAssetProvider<Material> material in mesh.Materials)
+            {
+                if (material != null)
+                {
+                    Worker worker = (Component)material;
+                    Action<IAssetRef> action;
+                    if ((action = primaryAction) == null)
+                    {
+                        action = (primaryAction = delegate (IAssetRef textureRef)
+                        {
+                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+                            if (texture != null)
+                            {
+                                texture.PreferredFormat.Value = targetFormat;
+                            }
+                        });
+                    }
+                    worker.ForeachSyncMember<IAssetRef>(action);
+                }
+            }
+        }
+    }
+
+    private static void ForceFormat(IButton sourceButton, ButtonEventData eventData)
+    {
+        Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
+        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        Action<IAssetRef> primaryAction = null!;
+        if (targetSlot == null) return;
+
+        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
+        {
+            foreach (IAssetProvider<Material> material in mesh.Materials)
+            {
+                if (material != null)
+                {
+                    Worker worker = (Component)material;
+                    Action<IAssetRef> action;
+                    if ((action = primaryAction) == null)
+                    {
+                        action = (primaryAction = delegate (IAssetRef textureRef)
+                        {
+                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+                            if (texture != null)
+                            {
+                                texture.PreferredFormat.Value = targetFormat;
+                                texture.ForceExactVariant.Value = true;
+                            }
+                        });
+                    }
+                    worker.ForeachSyncMember<IAssetRef>(action);
+                }
+            }
+        }
     }
 }
