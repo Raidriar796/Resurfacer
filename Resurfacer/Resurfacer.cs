@@ -93,7 +93,10 @@ public class Resurfacer : ResoniteMod
                             StaticTexture2D texture = textureRef.Target as StaticTexture2D;
                             if (texture != null)
                             {
-                                texture.PreferredFormat.Value = targetFormat;
+                                if (texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
+                                {
+                                    texture.PreferredFormat.Value = targetFormat;
+                                }
                             }
                         });
                     }
@@ -125,8 +128,11 @@ public class Resurfacer : ResoniteMod
                             StaticTexture2D texture = textureRef.Target as StaticTexture2D;
                             if (texture != null)
                             {
-                                texture.PreferredFormat.Value = targetFormat;
-                                texture.ForceExactVariant.Value = true;
+                                if (texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
+                                {
+                                    texture.PreferredFormat.Value = targetFormat;
+                                    texture.ForceExactVariant.Value = true;
+                                }
                             }
                         });
                     }
