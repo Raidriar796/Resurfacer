@@ -66,11 +66,13 @@ public class Resurfacer : ResoniteMod
         var setFormatButton = UI.Button("Set Preferred Format");
         var forceFormatButton = UI.Button("Force Preferred Format");
         var unsetForceButton = UI.Button("Unset Force Format");
+        var unsetPreferredButton = UI.Button("Unset Preferred Format");
 
         // Subscribe buttons to methods
         setFormatButton.LocalPressed += SetFormat;
         forceFormatButton.LocalPressed += ForceFormat;
         unsetForceButton.LocalPressed += UnsetForceFormat;
+        unsetPreferredButton.LocalPressed += UnsetPreferredFormat;
 
     }
 
@@ -170,6 +172,41 @@ public class Resurfacer : ResoniteMod
                                 if (texture.Uncompressed.Value == false)
                                 {
                                     texture.ForceExactVariant.Value = false;
+                                }
+                            }
+                        });
+                    }
+                    worker.ForeachSyncMember<IAssetRef>(action);
+                }
+            }
+        }
+    }
+
+    private static void UnsetPreferredFormat(IButton sourceButton, ButtonEventData eventData)
+    {
+        Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
+        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        Action<IAssetRef> primaryAction = null!;
+        if (targetSlot == null) return;
+
+        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
+        {
+            foreach (IAssetProvider<Material> material in mesh.Materials)
+            {
+                if (material != null)
+                {
+                    Worker worker = (Component)material;
+                    Action<IAssetRef> action;
+                    if ((action = primaryAction) == null)
+                    {
+                        action = (primaryAction = delegate (IAssetRef textureRef)
+                        {
+                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+                            if (texture != null)
+                            {
+                                if (texture.Uncompressed.Value == false)
+                                {
+                                    texture.PreferredFormat.Value = null;
                                 }
                             }
                         });
