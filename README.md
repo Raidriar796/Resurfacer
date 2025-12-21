@@ -9,13 +9,22 @@ This mod is heavily WIP, it will support more batch operations over time. If you
 1. Open the `Create New...` menu with a dev tool
 2. Spawn the Resurfacer from the `Editor` submenu
 3. Provide a slot reference for the target hierarchy
-4. Select the format you want to convert all textures to
-5. Press `Set Format` or `Force Format`
-  - `Set Format` will only set `PreferredFormat`
-  - `Force Format` will set `PreferredFormat` and enable `ForceExactVariant`
+4. Run some batch operations! 
 
-### Note
-- Textures with `Uncompressed` or `PreferredFormat` enabled already will be ignored
+## What does each button do?
+
+- Set Preferred Format
+  - Sets the `PreferredFormat` on every texture to the selected format.
+  - Textures with `Uncompressed` or `PreferredFormat` enabled will be ignored.
+- Force Preferred Format
+  - Sets the `PreferredFormat` on every texture and additionally sets `ForceExactVariant`.
+  - Textures with `Uncompressed` or `PreferredFormat` enabled will be ignored.
+- Unset Force Format
+  - Disables `ForceExactVariant` on every texture.
+- Unset Preferred Format
+  - Disables `PreferredFormat` on every texture.
+- Re-Encode
+  - Re-encodes every image, generally saving space for cloud storage.
 
 ## Requirements
 - [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader)
