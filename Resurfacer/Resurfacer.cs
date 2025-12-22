@@ -11,7 +11,7 @@ public class Resurfacer : ResoniteMod
 {
     public override string Name => "Resurfacer";
     public override string Author => "Raidriar796";
-    public override string Version => "0.2.0";
+    public override string Version => "0.2.1";
     public override string Link => "https://github.com/Raidriar796/Resurfacer";
     public static ModConfiguration Config;
 
