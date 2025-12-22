@@ -13,7 +13,7 @@ public class Resurfacer : ResoniteMod
     public override string Author => "Raidriar796";
     public override string Version => "0.2.0";
     public override string Link => "https://github.com/Raidriar796/Resurfacer";
-    public static ModConfiguration? Config;
+    public static ModConfiguration Config;
 
     public override void OnEngineInit()
     {
@@ -68,167 +68,110 @@ public class Resurfacer : ResoniteMod
         var unsetForceButton = UI.Button("Unset Force Format");
         var unsetPreferredButton = UI.Button("Unset Preferred Format");
 
-        // Subscribe buttons to methods
-        setFormatButton.LocalPressed += SetFormat;
-        forceFormatButton.LocalPressed += ForceFormat;
-        unsetForceButton.LocalPressed += UnsetForceFormat;
-        unsetPreferredButton.LocalPressed += UnsetPreferredFormat;
-
         UI.Spacer(24f);
 
         // Setup buttons for re-encoding
         var reEncodeButton = UI.Button("Re-Encode");
 
         // Subscribe buttons to methods
+        setFormatButton.LocalPressed += SetFormat;
+        forceFormatButton.LocalPressed += ForceFormat;
+        unsetForceButton.LocalPressed += UnsetForceFormat;
+        unsetPreferredButton.LocalPressed += UnsetPreferredFormat;
         reEncodeButton.LocalPressed += ReEncode;
     }
+
+    private static TextureCompression targetFormat = new();
 
     private static void SetFormat(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
-        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
-        Action<IAssetRef> primaryAction = null!;
-        if (targetSlot == null) return;
-
-        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
-        {
-            foreach (IAssetProvider<Material> material in mesh.Materials)
-            {
-                if (material != null)
-                {
-                    Worker worker = (Component)material;
-                    Action<IAssetRef> action;
-                    if ((action = primaryAction) == null)
-                    {
-                        action = (primaryAction = delegate (IAssetRef textureRef)
-                        {
-                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-                            if (texture != null)
-                            {
-                                if (texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
-                                {
-                                    texture.PreferredFormat.Value = targetFormat;
-                                }
-                            }
-                        });
-                    }
-                    worker.ForeachSyncMember<IAssetRef>(action);
-                }
-            }
-        }
+        targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        BatchAction(targetSlot, setFormatAction);
     }
 
     private static void ForceFormat(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
-        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
-        Action<IAssetRef> primaryAction = null!;
-        if (targetSlot == null) return;
-
-        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
-        {
-            foreach (IAssetProvider<Material> material in mesh.Materials)
-            {
-                if (material != null)
-                {
-                    Worker worker = (Component)material;
-                    Action<IAssetRef> action;
-                    if ((action = primaryAction) == null)
-                    {
-                        action = (primaryAction = delegate (IAssetRef textureRef)
-                        {
-                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-                            if (texture != null)
-                            {
-                                if (texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
-                                {
-                                    texture.PreferredFormat.Value = targetFormat;
-                                    texture.ForceExactVariant.Value = true;
-                                }
-                            }
-                        });
-                    }
-                    worker.ForeachSyncMember<IAssetRef>(action);
-                }
-            }
-        }
+        targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        BatchAction(targetSlot, forceFormatAction);
     }
 
     private static void UnsetForceFormat(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
-        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
-        Action<IAssetRef> primaryAction = null!;
-        if (targetSlot == null) return;
-
-        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
-        {
-            foreach (IAssetProvider<Material> material in mesh.Materials)
-            {
-                if (material != null)
-                {
-                    Worker worker = (Component)material;
-                    Action<IAssetRef> action;
-                    if ((action = primaryAction) == null)
-                    {
-                        action = (primaryAction = delegate (IAssetRef textureRef)
-                        {
-                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-                            if (texture != null)
-                            {
-                                if (texture.Uncompressed.Value == false)
-                                {
-                                    texture.ForceExactVariant.Value = false;
-                                }
-                            }
-                        });
-                    }
-                    worker.ForeachSyncMember<IAssetRef>(action);
-                }
-            }
-        }
+        targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        BatchAction(targetSlot, unsetForceAction);
     }
 
     private static void UnsetPreferredFormat(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
-        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
-        Action<IAssetRef> primaryAction = null!;
-        if (targetSlot == null) return;
-
-        foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
-        {
-            foreach (IAssetProvider<Material> material in mesh.Materials)
-            {
-                if (material != null)
-                {
-                    Worker worker = (Component)material;
-                    Action<IAssetRef> action;
-                    if ((action = primaryAction) == null)
-                    {
-                        action = (primaryAction = delegate (IAssetRef textureRef)
-                        {
-                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-                            if (texture != null)
-                            {
-                                if (texture.Uncompressed.Value == false)
-                                {
-                                    texture.PreferredFormat.Value = null;
-                                }
-                            }
-                        });
-                    }
-                    worker.ForeachSyncMember<IAssetRef>(action);
-                }
-            }
-        }
+        targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        BatchAction(targetSlot, unsetPreferredAction);
     }
 
     private static void ReEncode(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
-        TextureCompression targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
-        Action<IAssetRef> primaryAction = null!;
+        targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
+        BatchAction(targetSlot, reEncodeAction);
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
+    private static readonly Action<IAssetRef> setFormatAction = delegate (IAssetRef textureRef)
+    {
+        StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+        if (texture != null && texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
+        {
+            texture.PreferredFormat.Value = targetFormat;
+        } 
+    };
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
+    private static readonly Action<IAssetRef> forceFormatAction = delegate (IAssetRef textureRef)
+    {
+        StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+        if (texture != null && texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
+        {
+            texture.PreferredFormat.Value = targetFormat;
+            texture.ForceExactVariant.Value = true;
+        }
+    };
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
+    private static readonly Action<IAssetRef> unsetForceAction = delegate (IAssetRef textureRef)
+    {
+        StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+        if (texture != null && texture.Uncompressed.Value == false)
+        {
+            texture.ForceExactVariant.Value = false;
+        }
+    };
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
+    private static readonly Action<IAssetRef> unsetPreferredAction = delegate (IAssetRef textureRef)
+    {
+        StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+        if (texture != null && texture.Uncompressed.Value == false)
+        {
+            texture.PreferredFormat.Value = null;
+        }
+    };
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
+    private static readonly Action<IAssetRef> reEncodeAction = delegate (IAssetRef textureRef)
+    {
+        StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+        if (texture != null)
+        {
+            var longestSide = MathX.Max(texture.Asset.BitmapMetadata.Height, texture.Asset.BitmapMetadata.Width);
+            texture.Rescale(longestSide, texture.MipMapFilter);
+        }
+    };
+
+    private static void BatchAction(Slot targetSlot, Action<IAssetRef> action)
+    {
         if (targetSlot == null) return;
 
         foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
@@ -238,23 +181,9 @@ public class Resurfacer : ResoniteMod
                 if (material != null)
                 {
                     Worker worker = (Component)material;
-                    Action<IAssetRef> action;
-                    if ((action = primaryAction) == null)
-                    {
-                        action = (primaryAction = delegate (IAssetRef textureRef)
-                        {
-                            StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-                            if (texture != null)
-                            {
-                                var longestSide = MathX.Max(texture.Asset.BitmapMetadata.Height, texture.Asset.BitmapMetadata.Width);
-                                texture.Rescale(longestSide, texture.MipMapFilter);
-                            }
-                        });
-                    }
-                    worker.ForeachSyncMember<IAssetRef>(action);
+                    worker.ForeachSyncMember(action);
                 }
             }
         }
     }
-
 }
