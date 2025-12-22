@@ -81,8 +81,10 @@ public class Resurfacer : ResoniteMod
         reEncodeButton.LocalPressed += ReEncode;
     }
 
+    // Intentionally not local so I can avoid issues with passing arguments to methods
     private static TextureCompression targetFormat = new();
 
+    // Methods for handling info to pass to the main batch action method
     private static void SetFormat(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
@@ -118,6 +120,9 @@ public class Resurfacer : ResoniteMod
         BatchAction(targetSlot, reEncodeAction);
     }
 
+    // The actions that are ran per texture in each job
+    // IDE0019 is supressed since the intended ways of writing this result in it simply not working
+    // If a working solution is found, I will remove the supression
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
     private static readonly Action<IAssetRef> setFormatAction = delegate (IAssetRef textureRef)
     {
@@ -170,6 +175,7 @@ public class Resurfacer : ResoniteMod
         }
     };
 
+    // Find every material in every mesh, then run an action for each texture on said materials
     private static void BatchAction(Slot targetSlot, Action<IAssetRef> action)
     {
         if (targetSlot == null) return;
