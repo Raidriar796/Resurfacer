@@ -180,11 +180,14 @@ public class Resurfacer : ResoniteMod
     {
         if (targetSlot == null) return;
 
+        // Used to skip duplicate instances of materials
+        HashSet<RefID> materialHashes = [];
+
         foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
         {
             foreach (IAssetProvider<Material> material in mesh.Materials)
             {
-                if (material != null)
+                if (material != null && materialHashes.Add(material.ReferenceID))
                 {
                     Worker worker = (Component)material;
                     worker.ForeachSyncMember(action);
