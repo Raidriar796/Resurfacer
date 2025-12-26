@@ -32,8 +32,17 @@ public class Resurfacer : ResoniteMod
         DevCreateNewForm.AddAction("Editor", "Resurfacer", (UI) => SpawnResurfacer(UI));
     }
 
+    // Used to keep track of the current Resurfacer to delete old Resurfacers
+    private static Slot activeResurfacer = null;
+
     private static void SpawnResurfacer(Slot ResurfacerUI)
     {
+        // Destroy existing Resurfacer
+        if (activeResurfacer != null && !activeResurfacer.IsDestroyed) activeResurfacer.Destroy();
+
+        // Track new Resurfacer
+        activeResurfacer = ResurfacerUI;
+
         // Slot setup
         ResurfacerUI.PersistentSelf = false;
         ResurfacerUI.LocalScale *= 0.0005f;
