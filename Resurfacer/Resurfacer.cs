@@ -70,6 +70,16 @@ public class Resurfacer : ResoniteMod
 
         UI.Spacer(24f);
 
+        // Setup mip map filter
+        ValueField<Filtering> targetFilter = ResurfacerUI.AttachComponent<ValueField<Filtering>>();
+        targetFilter.Value.Value = Filtering.Box;
+        UI.EnumMemberEditor(targetFilter.Value);
+
+        // Setup button for mip map filtering
+        var setFilterButton = UI.Button("Set Mip Map Filter");
+
+        UI.Spacer(24f);
+
         // Setup buttons for re-encoding
         var reEncodeButton = UI.Button("Re-Encode");
 
@@ -78,11 +88,13 @@ public class Resurfacer : ResoniteMod
         forceFormatButton.LocalPressed += ForceFormat;
         unsetForceButton.LocalPressed += UnsetForceFormat;
         unsetPreferredButton.LocalPressed += UnsetPreferredFormat;
+        setFilterButton.LocalPressed += SetFilter;
         reEncodeButton.LocalPressed += ReEncode;
     }
 
     // Intentionally not local so I can avoid issues with passing arguments to methods
     private static TextureCompression targetFormat = new();
+    private static Filtering targetFilter = new();
 
     // Methods for handling info to pass to the main batch action method
     private static void SetFormat(IButton sourceButton, ButtonEventData eventData)
@@ -113,10 +125,16 @@ public class Resurfacer : ResoniteMod
         BatchAction(targetSlot, unsetPreferredAction);
     }
 
+    private static void SetFilter(IButton sourceButton, ButtonEventData eventData)
+    {
+        Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
+        targetFilter = sourceButton.Slot.GetComponentInParents<ValueField<Filtering>>().Value;
+        BatchAction(targetSlot, setFilterAction);
+    }
+
     private static void ReEncode(IButton sourceButton, ButtonEventData eventData)
     {
         Slot targetSlot = sourceButton.Slot.GetComponentInParents<ReferenceField<Slot>>().Reference;
-        targetFormat = sourceButton.Slot.GetComponentInParents<ValueField<TextureCompression>>().Value;
         BatchAction(targetSlot, reEncodeAction);
     }
 
@@ -164,6 +182,16 @@ public class Resurfacer : ResoniteMod
         if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false)
         {
             texture.PreferredFormat.Value = null;
+        }
+    };
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "IDE0019", Justification = "Intended solutions do not work.")]
+    private static readonly Action<IAssetRef> setFilterAction = delegate (IAssetRef textureRef)
+    {
+        StaticTexture2D texture = textureRef.Target as StaticTexture2D;
+        if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false)
+        {
+            texture.MipMapFilter.Value = targetFilter;
         }
     };
 
