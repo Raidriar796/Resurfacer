@@ -39,7 +39,7 @@ public class Resurfacer : ResoniteMod
         ResurfacerUI.LocalScale *= 0.0005f;
 
         // Initial UI generation
-        UIBuilder UI = RadiantUI_Panel.SetupPanel(ResurfacerUI, "Resurfacer", new float2(360f, 480f), true, true);
+        UIBuilder UI = RadiantUI_Panel.SetupPanel(ResurfacerUI, "Resurfacer", new float2(360f, 640f), true, true);
         RadiantUI_Constants.SetupEditorStyle(UI);
         VerticalLayout verticalLayout = UI.VerticalLayout(4f);
         UI.Style.MinHeight = 24f;
@@ -49,14 +49,14 @@ public class Resurfacer : ResoniteMod
         UI.Canvas.AcceptPhysicalTouch.Value = false;
         UI.Canvas.MarkDeveloper();
 
-        UI.Text("Target Hierarchy:", true, Alignment.BottomCenter);
+        UI.Text("Process Root:", true, Alignment.BottomCenter);
         UI.Next("Root");
 
         // Setup target slot field
         ReferenceField<Slot> targetSlot = ResurfacerUI.AttachComponent<ReferenceField<Slot>>();
         UI.Current.AttachComponent<RefEditor>().Setup(targetSlot.Reference);
 
-        UI.Spacer(24f);
+        UI.Text("----------", true, Alignment.MiddleCenter);
 
         // Setup preferred format
         ValueField<TextureCompression> targetFormat = ResurfacerUI.AttachComponent<ValueField<TextureCompression>>();
@@ -68,7 +68,7 @@ public class Resurfacer : ResoniteMod
         var unsetForceButton = UI.Button("Unset Force Format");
         var unsetPreferredButton = UI.Button("Unset Preferred Format");
 
-        UI.Spacer(24f);
+        UI.Text("----------", true, Alignment.MiddleCenter);
 
         // Setup mip map filter
         ValueField<Filtering> targetFilter = ResurfacerUI.AttachComponent<ValueField<Filtering>>();
@@ -78,10 +78,13 @@ public class Resurfacer : ResoniteMod
         // Setup button for mip map filtering
         var setFilterButton = UI.Button("Set Mip Map Filter");
 
-        UI.Spacer(24f);
+        UI.Text("----------", true, Alignment.MiddleCenter);
 
         // Setup buttons for re-encoding
         var reEncodeButton = UI.Button("Re-Encode");
+        
+        UI.Text("Result:", true, Alignment.BottomCenter);
+        var resultText =  UI.Text("----");
 
         // Subscribe buttons to methods
         setFormatButton.LocalPressed += SetFormat;
