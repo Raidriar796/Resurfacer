@@ -120,6 +120,9 @@ public class Resurfacer : ResoniteMod
         BatchAction(targetSlot, reEncodeAction);
     }
 
+    // Used to skip duplicate instances of materials and textures
+    private static readonly HashSet<RefID> refHashes = [];
+
     // The actions that are ran per texture in each job
     // IDE0019 is supressed since the intended ways of writing this result in it simply not working
     // If a working solution is found, I will remove the supression
@@ -127,7 +130,7 @@ public class Resurfacer : ResoniteMod
     private static readonly Action<IAssetRef> setFormatAction = delegate (IAssetRef textureRef)
     {
         StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-        if (texture != null && texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
+        if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
         {
             texture.PreferredFormat.Value = targetFormat;
         } 
@@ -137,7 +140,7 @@ public class Resurfacer : ResoniteMod
     private static readonly Action<IAssetRef> forceFormatAction = delegate (IAssetRef textureRef)
     {
         StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-        if (texture != null && texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
+        if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false && texture.PreferredFormat.Value == null)
         {
             texture.PreferredFormat.Value = targetFormat;
             texture.ForceExactVariant.Value = true;
@@ -148,7 +151,7 @@ public class Resurfacer : ResoniteMod
     private static readonly Action<IAssetRef> unsetForceAction = delegate (IAssetRef textureRef)
     {
         StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-        if (texture != null && texture.Uncompressed.Value == false)
+        if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false)
         {
             texture.ForceExactVariant.Value = false;
         }
@@ -158,7 +161,7 @@ public class Resurfacer : ResoniteMod
     private static readonly Action<IAssetRef> unsetPreferredAction = delegate (IAssetRef textureRef)
     {
         StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-        if (texture != null && texture.Uncompressed.Value == false)
+        if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false)
         {
             texture.PreferredFormat.Value = null;
         }
@@ -168,7 +171,7 @@ public class Resurfacer : ResoniteMod
     private static readonly Action<IAssetRef> reEncodeAction = delegate (IAssetRef textureRef)
     {
         StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-        if (texture != null)
+        if (texture != null && refHashes.Add(texture.ReferenceID))
         {
             var longestSide = MathX.Max(texture.Asset.BitmapMetadata.Height, texture.Asset.BitmapMetadata.Width);
             texture.Rescale(longestSide, texture.MipMapFilter);
@@ -180,19 +183,19 @@ public class Resurfacer : ResoniteMod
     {
         if (targetSlot == null) return;
 
-        // Used to skip duplicate instances of materials
-        HashSet<RefID> materialHashes = [];
-
         foreach (MeshRenderer mesh in targetSlot.GetComponentsInChildren<MeshRenderer>())
         {
             foreach (IAssetProvider<Material> material in mesh.Materials)
             {
-                if (material != null && materialHashes.Add(material.ReferenceID))
+                if (material != null && refHashes.Add(material.ReferenceID))
                 {
                     Worker worker = (Component)material;
                     worker.ForeachSyncMember(action);
                 }
             }
         }
+
+        // Clear refs after each batch for the next batch
+        refHashes.Clear();
     }
 }
