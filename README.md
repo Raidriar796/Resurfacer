@@ -23,6 +23,8 @@ This mod is heavily WIP, it will support more batch operations over time. If you
   - Disables `ForceExactVariant` on every texture.
 - Unset Preferred Format
   - Disables `PreferredFormat` on every texture.
+- Set Mip Map Filter
+  - Sets the `MipMapFilter` on every texture to the selected filter.
 - Re-Encode
   - Re-encodes every image, generally saving space for cloud storage.
 
