@@ -201,7 +201,7 @@ public class Resurfacer : ResoniteMod
     private static readonly Action<IAssetRef> setFilterAction = delegate (IAssetRef textureRef)
     {
         StaticTexture2D texture = textureRef.Target as StaticTexture2D;
-        if (texture != null && refHashes.Add(texture.ReferenceID) && texture.Uncompressed.Value == false)
+        if (texture != null && refHashes.Add(texture.ReferenceID))
         {
             texture.MipMapFilter.Value = targetFilter;
         }
