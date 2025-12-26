@@ -91,9 +91,6 @@ public class Resurfacer : ResoniteMod
 
         // Setup buttons for re-encoding
         var reEncodeButton = UI.Button("Re-Encode");
-        
-        UI.Text("Result:", true, Alignment.BottomCenter);
-        var resultText =  UI.Text("----");
 
         // Subscribe buttons to methods
         setFormatButton.LocalPressed += SetFormat;
